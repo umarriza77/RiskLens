@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int             @id @default(autoincrement())
+  email        String          @unique
+  passwordHash String
+  businessName String
+  createdAt    DateTime        @default(now())
+
+  submissions  KpiSubmission[]
+  bhsRecords   BhsRecord[]
+}
+
+model KpiSubmission {
+  id                 Int        @id @default(autoincrement())
+  userId             Int
+  periodLabel        String
+  revenue            Float
+  previousRevenue    Float
+  netIncome          Float
+  totalExpenses      Float
+  currentAssets      Float
+  currentLiabilities Float
+  totalAssets        Float
+  createdAt          DateTime   @default(now())
+
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bhsRecord          BhsRecord?
+
+  @@index([userId])
+}
+
+model BhsRecord {
+  id                  Int           @id @default(autoincrement())
+  submissionId        Int           @unique
+  userId              Int
+  bhs                 Float
+  riskLevel           RiskLevel
+  performanceBand     String
+  profitMarginScore   Float
+  currentRatioScore   Float
+  roaScore            Float
+  expenseRatioScore   Float
+  revenueGrowthScore  Float
+  breakdown           Json
+  createdAt           DateTime      @default(now())
+
+  submission          KpiSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum RiskLevel {
+  Low
+  Moderate
+  High
+  Critical
+}
