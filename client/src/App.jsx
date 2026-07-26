@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import KpiInput from "@/pages/KpiInput";
 
 export default function App() {
   return (
@@ -14,13 +16,15 @@ export default function App() {
           <Route
             element={
               <ProtectedRoute>
-                <div className="p-4 text-center">Protected Content</div>
+                <Layout />
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<div />} />
+            <Route path="/" element={<div className="p-8 text-gray-500">Dashboard (WIP)</div>} />
+            <Route path="/input" element={<KpiInput />} />
+            <Route path="/history" element={<div className="p-8 text-gray-500">History (WIP)</div>} />
           </Route>
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
