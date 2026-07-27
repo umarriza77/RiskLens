@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { register, login, me } from "../controllers/auth.controller.js";
 import { createScore, getRecord } from "../controllers/score.controller.js";
+import { getHistory } from "../controllers/history.controller.js";
 
 const router = Router();
 
@@ -15,6 +16,9 @@ router.get("/auth/me", requireAuth, me);
 // Scoring
 router.post("/score", requireAuth, createScore);
 router.get("/submissions/:id", requireAuth, getRecord);
+
+// History
+router.get("/history", requireAuth, getHistory);
 
 export default router;
 
