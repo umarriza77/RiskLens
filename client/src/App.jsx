@@ -4,7 +4,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import Dashboard from "@/pages/Dashboard";
 import KpiInput from "@/pages/KpiInput";
+import History from "@/pages/History";
 
 export default function App() {
   return (
@@ -20,9 +22,9 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<div className="p-8 text-gray-500">Dashboard (WIP)</div>} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/input" element={<KpiInput />} />
-            <Route path="/history" element={<div className="p-8 text-gray-500">History (WIP)</div>} />
+            <Route path="/history" element={<History />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -30,4 +32,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-
