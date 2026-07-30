@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { Download } from "lucide-react";
 import api from "@/lib/api";
 import TrendChart from "@/components/TrendChart";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RISK_STYLES } from "@/lib/format";
-
+import { downloadReport } from "@/lib/report";
 
 export default function History() {
   const [records, setRecords] = useState([]);
@@ -89,7 +89,7 @@ export default function History() {
                   <TableHead>BHS</TableHead>
                   <TableHead>Risk</TableHead>
                   <TableHead>Performance</TableHead>
-
+                  <TableHead className="text-right">Report</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -104,7 +104,11 @@ export default function History() {
                         <Badge variant={style.variant}>{style.label}</Badge>
                       </TableCell>
                       <TableCell>{r.performanceBand}</TableCell>
-
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" onClick={() => downloadReport(r.id, r.periodLabel)}>
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}

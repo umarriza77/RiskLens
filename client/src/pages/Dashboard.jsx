@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { PlusCircle } from "lucide-react";
+import { Download, PlusCircle } from "lucide-react";
 import api from "@/lib/api";
 import BhsGauge from "@/components/BhsGauge";
 import KpiCard from "@/components/KpiCard";
@@ -8,7 +8,7 @@ import RiskAlertPanel from "@/components/RiskAlertPanel";
 import TrendChart from "@/components/TrendChart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { downloadReport } from "@/lib/report";
 
 export default function Dashboard() {
   const [params] = useSearchParams();
@@ -68,7 +68,9 @@ export default function Dashboard() {
           <p className="text-sm text-muted-foreground">Period: {record.periodLabel}</p>
         </div>
         <div className="flex gap-2">
-
+          <Button variant="outline" onClick={() => downloadReport(record.id, record.periodLabel)}>
+            <Download className="h-4 w-4" /> PDF Report
+          </Button>
           <Button asChild>
             <Link to="/input">
               <PlusCircle className="h-4 w-4" /> New
