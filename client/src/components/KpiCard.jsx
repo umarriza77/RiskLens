@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import ChangeIndicator from "@/components/ChangeIndicator";
 import { formatKpiValue } from "@/lib/format";
 
 const ACCENT = {
@@ -10,8 +11,11 @@ const ACCENT = {
 
 /**
  * Colour-coded KPI indicator card (green / amber / red) per spec.
+ *
+ * `change` is optional and comes from the progress endpoint's KPI comparison;
+ * when present the card also shows the movement since the previous assessment.
  */
-export default function KpiCard({ kpi }) {
+export default function KpiCard({ kpi, change }) {
   return (
     <Card className={`border-l-4 ${ACCENT[kpi.color] || "border-l-slate-300"}`}>
       <CardContent className="pt-6">
@@ -22,7 +26,17 @@ export default function KpiCard({ kpi }) {
           </div>
           <Badge variant={kpi.color}>{kpi.score}/100</Badge>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">Weight: {kpi.weight}%</p>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">Weight: {kpi.weight}%</p>
+          {change && (
+            <ChangeIndicator percent={change.percent} absolute={change.absolute} movement={change.movement} />
+          )}
+        </div>
+        {change && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Previous: {formatKpiValue({ value: change.previous.value, unit: kpi.unit })}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

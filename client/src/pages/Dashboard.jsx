@@ -6,28 +6,32 @@ import BhsGauge from "@/components/BhsGauge";
 import KpiCard from "@/components/KpiCard";
 import RiskAlertPanel from "@/components/RiskAlertPanel";
 import TrendChart from "@/components/TrendChart";
+import ProgressSummary from "@/components/ProgressSummary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { downloadReport } from "@/lib/report";
+
+const EMPTY_PROGRESS = { series: [], summary: null, kpiComparison: [] };
 
 export default function Dashboard() {
   const [params] = useSearchParams();
   const recordId = params.get("recordId");
   const [record, setRecord] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [progress, setProgress] = useState(EMPTY_PROGRESS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const hist = await api.get("/history");
-        setHistory(hist.data);
+        const res = await api.get("/history/progress");
+        const data = res.data ?? EMPTY_PROGRESS;
+        setProgress(data);
 
-        const targetId = recordId || hist.data[hist.data.length - 1]?.id;
+        const targetId = recordId || data.series[data.series.length - 1]?.id;
         if (targetId) {
-          const res = await api.get(`/submissions/${targetId}`);
-          setRecord(res.data);
+          const detail = await api.get(`/submissions/${targetId}`);
+          setRecord(detail.data);
         }
       } finally {
         setLoading(false);
@@ -59,6 +63,12 @@ export default function Dashboard() {
       </Card>
     );
   }
+
+  const { series, summary, kpiComparison } = progress;
+  // The KPI comparison covers the two latest assessments, so only surface it
+  // when the dashboard is actually showing the latest one.
+  const isLatest = series.length > 0 && series[series.length - 1].id === record.id;
+  const changeFor = (key) => (isLatest ? kpiComparison.find((row) => row.key === key) : undefined);
 
   return (
     <div className="space-y-6">
@@ -101,18 +111,20 @@ export default function Dashboard() {
         <h2 className="mb-3 text-lg font-semibold">Key Performance Indicators</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {record.kpis.map((kpi) => (
-            <KpiCard key={kpi.key} kpi={kpi} />
+            <KpiCard key={kpi.key} kpi={kpi} change={changeFor(kpi.key)} />
           ))}
         </div>
       </div>
 
-      {history.length > 1 && (
+      {isLatest && <ProgressSummary summary={summary} />}
+
+      {series.length > 1 && (
         <Card>
           <CardHeader>
             <CardTitle>Health Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <TrendChart data={history} />
+            <TrendChart data={series} />
           </CardContent>
         </Card>
       )}
