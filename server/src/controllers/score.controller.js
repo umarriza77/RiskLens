@@ -13,8 +13,9 @@ const figuresSchema = z.object({
   totalAssets: z.number().nonnegative(),
 });
 
+/** Sub-score for a KPI, or null when the indicator was excluded from the score. */
 function subScore(kpis, key) {
-  return kpis.find((k) => k.key === key)?.score ?? 0;
+  return kpis.find((k) => k.key === key)?.score ?? null;
 }
 
 /** POST /api/score — compute, persist, and return a BHS result. */

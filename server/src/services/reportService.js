@@ -5,10 +5,13 @@ const COLORS = {
   green: "#16a34a",
   amber: "#d97706",
   red: "#dc2626",
+  neutral: "#64748b",
   ink: "#0f172a",
   muted: "#64748b",
   line: "#e2e8f0",
 };
+
+const STATUS_LABEL = { neutral: "N/A" };
 
 const RISK_COLOR = {
   Low: COLORS.green,
@@ -71,11 +74,21 @@ export function streamReport(res, record) {
   y += 8;
 
   for (const kpi of record.kpis) {
+    const color = kpi.color || "neutral";
     doc.fillColor(COLORS.ink).fontSize(11).text(kpi.label, startX, y);
     doc.fillColor(COLORS.ink).text(fmtValue(kpi), startX + 230, y);
-    doc.fillColor(COLORS.ink).text(`${kpi.score}`, startX + 330, y);
-    doc.fillColor(COLORS[kpi.color] || COLORS.ink).text(kpi.color.toUpperCase(), startX + 420, y);
+    // An excluded indicator has no sub-score; a dash reads better than "null".
+    doc.fillColor(COLORS.ink).text(kpi.score === null || kpi.score === undefined ? "—" : `${kpi.score}`, startX + 330, y);
+    doc
+      .fillColor(COLORS[color] || COLORS.ink)
+      .text(STATUS_LABEL[color] ?? color.toUpperCase(), startX + 420, y);
     y += 20;
+
+    if (kpi.note) {
+      doc.fillColor(COLORS.muted).fontSize(8).text(kpi.note, startX + 12, y - 4, { width: 480 });
+      doc.fontSize(11);
+      y += 12;
+    }
   }
 
   doc.y = y + 10;

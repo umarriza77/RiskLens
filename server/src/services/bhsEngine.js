@@ -31,13 +31,26 @@ export function deriveKpis(f) {
   };
 }
 
+const isMissing = (value) => value === null || value === undefined || Number.isNaN(value);
+
 /**
  * Map a derived KPI value to its 0-100 sub-score using the configured bands.
- * `null` (uncomputable) and missing matches fall to the lowest band score.
+ *
+ * An uncomputable value (`null`) is resolved by the indicator's `nullPolicy`
+ * rather than being treated as the worst case for every indicator: a business
+ * with no current liabilities is maximally liquid, not maximally illiquid.
+ * `"exclude"` returns `null`, signalling to `computeBHS` that the indicator
+ * must be dropped and the remaining weights renormalised.
  */
 export function scoreKpi(def, value) {
   const lowest = def.bands[def.bands.length - 1].score;
-  if (value === null || value === undefined || Number.isNaN(value)) return lowest;
+  const highest = def.bands[0].score;
+
+  if (isMissing(value)) {
+    if (def.nullPolicy === "best") return highest;
+    if (def.nullPolicy === "exclude") return null;
+    return lowest;
+  }
 
   for (const band of def.bands) {
     if (def.direction === "lower") {
@@ -50,6 +63,7 @@ export function scoreKpi(def, value) {
 }
 
 function colorFor(score) {
+  if (score === null) return "neutral";
   if (score >= COLOR_CUTOFFS.green) return "green";
   if (score >= COLOR_CUTOFFS.amber) return "amber";
   return "red";
@@ -68,6 +82,11 @@ function riskFor(bhs) {
  *
  * @param {object} figures raw inputs: revenue, previousRevenue, netIncome,
  *   totalExpenses, currentAssets, currentLiabilities, totalAssets
+ * Indicators whose `nullPolicy` is "exclude" and whose value could not be
+ * computed are reported with a null score and left out of the weighted average;
+ * the remaining weights renormalise, so a first-period business is not punished
+ * for having no growth baseline.
+ *
  * @returns {{ bhs:number, riskLevel:string, performanceBand:string,
  *   kpis:Array, recommendations:string[] }}
  */
@@ -82,10 +101,13 @@ export function computeBHS(figures) {
   for (const def of KPI_DEFINITIONS) {
     const value = derived[def.key];
     const score = scoreKpi(def, value);
+    const excluded = score === null;
     const color = colorFor(score);
 
-    weightedTotal += score * def.weight;
-    weightSum += def.weight;
+    if (!excluded) {
+      weightedTotal += score * def.weight;
+      weightSum += def.weight;
+    }
 
     kpis.push({
       key: def.key,
@@ -93,11 +115,15 @@ export function computeBHS(figures) {
       unit: def.unit,
       weight: def.weight,
       value, // derived ratio (null if uncomputable)
-      score, // 0-100 sub-score
-      color, // green | amber | red
+      score, // 0-100 sub-score, or null when excluded
+      color, // green | amber | red | neutral
+      excluded, // true => not counted towards the composite
+      // explains an uncomputable ratio to the user (null when it computed fine)
+      note: isMissing(value) ? def.nullNote ?? null : null,
     });
 
-    if (color !== "green" && RECOMMENDATIONS[def.key]) {
+    // An excluded indicator has not been judged, so it earns no recommendation.
+    if (!excluded && color !== "green" && RECOMMENDATIONS[def.key]) {
       recommendations.push(RECOMMENDATIONS[def.key]);
     }
   }

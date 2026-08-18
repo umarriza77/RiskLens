@@ -58,8 +58,15 @@ describe("scoreKpi", () => {
     expect(scoreKpi(d, 1.1)).toBe(10); // spending more than earning
   });
 
-  test("null value scores at the worst band", () => {
-    expect(scoreKpi(def("currentRatio"), null)).toBe(10);
+  test("an uncomputable ratio follows the indicator's null policy, not a blanket worst case", () => {
+    // "worst": no revenue means the business genuinely cannot be profitable
+    expect(scoreKpi(def("profitMargin"), null)).toBe(10);
+    expect(scoreKpi(def("expenseRatio"), null)).toBe(10);
+    // "best": no current liabilities is the healthiest liquidity position
+    expect(scoreKpi(def("currentRatio"), null)).toBe(100);
+    // "exclude": not measurable, so it is dropped from the composite
+    expect(scoreKpi(def("revenueGrowth"), null)).toBeNull();
+    expect(scoreKpi(def("roa"), null)).toBeNull();
   });
 });
 
@@ -129,6 +136,98 @@ describe("computeBHS", () => {
     const pm = r.kpis.find((k) => k.key === "profitMargin");
     expect(pm.color).toBe("green");
     expect(pm.score).toBe(100);
+    expect(pm.excluded).toBe(false);
     expect(r.kpis).toHaveLength(5);
+  });
+});
+
+describe("computeBHS with uncomputable indicators", () => {
+  const debtFree = {
+    revenue: 100000,
+    previousRevenue: 80000,
+    netIncome: 20000,
+    totalExpenses: 60000,
+    currentAssets: 50000,
+    currentLiabilities: 0, // debt-free
+    totalAssets: 120000,
+  };
+
+  const firstPeriod = {
+    revenue: 100000,
+    previousRevenue: 0, // no prior period
+    netIncome: 20000,
+    totalExpenses: 60000,
+    currentAssets: 50000,
+    currentLiabilities: 25000,
+    totalAssets: 120000,
+  };
+
+  test("a debt-free business is credited for liquidity, not penalised for it", () => {
+    const r = computeBHS(debtFree);
+    const cr = r.kpis.find((k) => k.key === "currentRatio");
+
+    expect(cr.value).toBeNull();
+    expect(cr.score).toBe(100);
+    expect(cr.color).toBe("green");
+    expect(cr.excluded).toBe(false);
+    expect(cr.note).toMatch(/no current liabilities/i);
+    // every other indicator is at its best band, so the composite is perfect
+    expect(r.bhs).toBe(100);
+    expect(r.riskLevel).toBe("Low");
+    expect(r.recommendations).toHaveLength(0);
+  });
+
+  test("a first-period business excludes growth and renormalises the remaining weights", () => {
+    const r = computeBHS(firstPeriod);
+    const growth = r.kpis.find((k) => k.key === "revenueGrowth");
+
+    expect(growth.value).toBeNull();
+    expect(growth.score).toBeNull();
+    expect(growth.excluded).toBe(true);
+    expect(growth.color).toBe("neutral");
+    expect(growth.note).toMatch(/no prior period/i);
+
+    // the other four all score 100 over a renormalised weight sum of 85, not 100
+    expect(r.bhs).toBe(100);
+    expect(r.riskLevel).toBe("Low");
+  });
+
+  test("an excluded indicator earns no recommendation", () => {
+    const r = computeBHS(firstPeriod);
+    expect(r.recommendations).toHaveLength(0);
+  });
+
+  test("exclusion renormalises rather than dropping points from the total", () => {
+    // profitMargin 60 (w25), currentRatio 60 (w20), roa 60 (w20),
+    // expenseRatio 60 (w20), growth excluded (w15) => 60, not 51
+    const r = computeBHS({
+      revenue: 100000,
+      previousRevenue: 0,
+      netIncome: 6000,
+      totalExpenses: 85000,
+      currentAssets: 60000,
+      currentLiabilities: 50000,
+      totalAssets: 150000,
+    });
+    expect(r.bhs).toBe(60);
+    expect(r.riskLevel).toBe("Moderate");
+  });
+
+  test("zero revenue is still treated as distress, not excused", () => {
+    const r = computeBHS({
+      revenue: 0,
+      previousRevenue: 100000,
+      netIncome: 0,
+      totalExpenses: 5000,
+      currentAssets: 10000,
+      currentLiabilities: 5000,
+      totalAssets: 20000,
+    });
+    const pm = r.kpis.find((k) => k.key === "profitMargin");
+    const er = r.kpis.find((k) => k.key === "expenseRatio");
+
+    expect(pm.score).toBe(10);
+    expect(er.score).toBe(10);
+    expect(r.riskLevel).toBe("Critical");
   });
 });

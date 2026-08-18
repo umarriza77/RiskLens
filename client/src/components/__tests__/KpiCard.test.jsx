@@ -24,6 +24,49 @@ describe("KpiCard", () => {
     expect(screen.getByText("N/A")).toBeInTheDocument();
   });
 
+  test("shows an excluded indicator as not scored, with the reason", () => {
+    render(
+      <KpiCard
+        kpi={{
+          key: "revenueGrowth",
+          label: "Revenue Growth Rate",
+          unit: "percent",
+          weight: 15,
+          value: null,
+          score: null,
+          color: "neutral",
+          excluded: true,
+          note: "No prior period to compare against, so growth is excluded from this score.",
+        }}
+      />
+    );
+    expect(screen.getByText("Not scored")).toBeInTheDocument();
+    expect(screen.getByText("Excluded from the score")).toBeInTheDocument();
+    expect(screen.getByText(/no prior period to compare against/i)).toBeInTheDocument();
+    expect(screen.queryByText("Weight: 15%")).not.toBeInTheDocument();
+  });
+
+  test("a debt-free current ratio is shown as a full score, not a failure", () => {
+    render(
+      <KpiCard
+        kpi={{
+          key: "currentRatio",
+          label: "Current Ratio",
+          unit: "ratio",
+          weight: 20,
+          value: null,
+          score: 100,
+          color: "green",
+          excluded: false,
+          note: "No current liabilities — nothing short-term to cover, so liquidity is treated as ideal.",
+        }}
+      />
+    );
+    expect(screen.getByText("100/100")).toBeInTheDocument();
+    expect(screen.getByText("Weight: 20%")).toBeInTheDocument();
+    expect(screen.getByText(/no current liabilities/i)).toBeInTheDocument();
+  });
+
   test("applies the colour accent border for the KPI status", () => {
     const { container } = render(
       <KpiCard kpi={{ key: "roa", label: "Return on Assets", unit: "percent", weight: 20, value: 0.05, score: 60, color: "amber" }} />
