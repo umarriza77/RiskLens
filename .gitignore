@@ -7,3 +7,17 @@ build/
 client/dist/
 server/prisma/dev.db
 coverage/
+
+# Bun is not used in this project
+bun.lock
+bun.lockb
+
+# Yarn writes this on every install; not meant for version control
+**/.yarn/install-state.gz
+
+# Local agent workspaces and editor backups
+.claude/
+*.bak
+
+# No root package.json, so a root lockfile is stray
+/package-lock.json
