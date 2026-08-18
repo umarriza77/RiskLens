@@ -4,7 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { to: "/", label: "Dashboard", end: true },
+  { to: "/", label: "Home", end: true },
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/input", label: "New Assessment" },
   { to: "/history", label: "History" },
 ];
