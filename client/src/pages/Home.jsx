@@ -23,7 +23,7 @@ const INDICATORS = [
   { label: "Net Profit Margin", weight: 25, measures: "How much of each ringgit of revenue you keep" },
   { label: "Current Ratio", weight: 20, measures: "Whether short-term assets cover short-term debts" },
   { label: "Return on Assets", weight: 20, measures: "How hard the assets you own are working" },
-  { label: "Expense Ratio", weight: 20, measures: "How much of your revenue is consumed by costs" },
+  { label: "Expense Ratio", weight: 20, measures: "How much of your revenue goes straight back out as costs" },
   { label: "Revenue Growth Rate", weight: 15, measures: "Whether sales are moving up or down" },
 ];
 
@@ -38,40 +38,40 @@ const FEATURES = [
   {
     icon: Gauge,
     title: "Business Health Score",
-    body: "Eight figures become five financial ratios, each scored against an SME benchmark and combined into one weighted score out of 100.",
+    body: "Eight numbers off your accounts, five financial ratios, one score out of 100. Each ratio is checked against an SME benchmark before it counts towards the total.",
   },
   {
     icon: ShieldAlert,
     title: "Four-tier risk classification",
-    body: "Every score maps to Low, Moderate, High or Critical risk, with a performance band and a plain-language verdict.",
+    body: "Your score lands in Low, Moderate, High or Critical. You also get a sentence in plain English saying what that actually means for the business.",
   },
   {
     icon: ListChecks,
-    title: "Recommendations that name the problem",
-    body: "Each indicator that falls short produces a specific action, so a healthy business still learns where it is weakest.",
+    title: "Recommendations you can act on",
+    body: "Anything that scores badly comes with something specific to do about it. Most healthy businesses still have one weak spot worth knowing about.",
   },
   {
     icon: TrendingUp,
     title: "Progress tracking",
-    body: "Each assessment is compared with the previous one and with your first, including whether your risk tier itself has changed.",
+    body: "Every new assessment gets compared against your last one and your first. If your risk level has shifted, the system tells you.",
   },
   {
     icon: FileText,
     title: "Exportable PDF reports",
-    body: "Download any assessment as a formatted report with the full indicator breakdown and recommendations.",
+    body: "Download any assessment as a PDF with the full breakdown and recommendations. Handy for your accountant, or the bank.",
   },
   {
     icon: Lock,
-    title: "Your data, only yours",
-    body: "Every record is scoped to your account and ownership is re-checked on every read. Passwords are hashed, never stored.",
+    title: "Your data stays yours",
+    body: "Records are tied to your account and checked on every request. Passwords are hashed, never stored as plain text.",
   },
 ];
 
 const STEPS = [
-  { n: 1, title: "Enter your figures", body: "Eight numbers from your accounts for the period: revenue, previous revenue, net income, expenses, current assets, current liabilities and total assets." },
-  { n: 2, title: "The engine derives five ratios", body: "Profitability, liquidity, asset efficiency, cost control and growth — one indicator per perspective rather than a single headline number." },
-  { n: 3, title: "Each ratio is scored and weighted", body: "Every ratio is matched to a benchmark band worth 0–100, then weighted into the composite score and classified into a risk tier." },
-  { n: 4, title: "Act, then measure again", body: "Work on the flagged indicators, submit the next period, and the system shows you whether it actually moved." },
+  { n: 1, title: "Enter your figures", body: "Eight numbers off your accounts for the period: revenue, last period\u2019s revenue, net income, expenses, current assets, current liabilities and total assets." },
+  { n: 2, title: "Five ratios get worked out", body: "Profitability, liquidity, asset efficiency, cost control and growth. Five separate angles on the same period, so a weak spot in one area shows up on its own." },
+  { n: 3, title: "Each ratio is scored and weighted", body: "Every ratio falls into a benchmark band worth somewhere between 0 and 100. Those are weighted, added up, and turned into your risk level." },
+  { n: 4, title: "Fix things, then check again", body: "Work on whatever got flagged. Enter next period\u2019s numbers when you have them and see if it made a difference." },
 ];
 
 function SectionHeading({ eyebrow, title, children }) {
@@ -115,9 +115,9 @@ export default function Home() {
             See risks. Stay ahead.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/80">
-            RiskLens turns the figures you already have into a Business Health Score you can explain —
-            with a risk level, the specific indicators dragging it down, and a record of whether things
-            are getting better.
+            Put in the numbers you already have from your accounts. You get back a health score out
+            of 100, a risk level, and a list of what is dragging it down. Do it again next quarter and
+            you will know whether any of it worked.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="secondary">
@@ -141,8 +141,8 @@ export default function Home() {
 
       {/* features */}
       <section>
-        <SectionHeading eyebrow="What it does" title="Everything the system gives you">
-          Six capabilities, all built on one deterministic scoring engine.
+        <SectionHeading eyebrow="What it does" title="What you get">
+          Six things the system does once your figures are in.
         </SectionHeading>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(({ icon: Icon, title, body }) => (
@@ -161,7 +161,7 @@ export default function Home() {
 
       {/* how it works */}
       <section>
-        <SectionHeading eyebrow="How it works" title="From your accounts to an action, in four steps" />
+        <SectionHeading eyebrow="How it works" title="Four steps, start to finish" />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step) => (
             <Card key={step.n} className="relative overflow-hidden">
@@ -183,7 +183,8 @@ export default function Home() {
           <CardContent className="pt-6">
             <h3 className="text-lg font-semibold">The five indicators</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each is scored 0–100 against an SME benchmark, then weighted into the composite.
+              Each one is scored from 0 to 100 against an SME benchmark, then weighted by how much it
+              matters.
             </p>
             <ul className="mt-6 space-y-4">
               {INDICATORS.map((ind) => (
@@ -207,9 +208,9 @@ export default function Home() {
 
         <Card className="lg:col-span-2">
           <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold">How risk is classified</h3>
+            <h3 className="text-lg font-semibold">What your score means</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              The composite score maps to one of four tiers.
+              Where your total lands, and what to do about it.
             </p>
             <ul className="mt-6 space-y-4">
               {TIERS.map((tier) => (
@@ -229,8 +230,9 @@ export default function Home() {
               ))}
             </ul>
             <p className="mt-6 rounded-md bg-secondary/60 p-3 text-xs leading-relaxed text-muted-foreground">
-              The same figures always produce the same score. Nothing is estimated or predicted — every
-              number can be traced back through a documented band to your own inputs.
+              The same figures always give the same score. Nothing is guessed at or predicted. If you
+              want to know why a number came out the way it did, you can follow it back to the figure
+              you typed in.
             </p>
           </CardContent>
         </Card>
@@ -238,10 +240,10 @@ export default function Home() {
 
       {/* closing CTA */}
       <section className="rounded-2xl border bg-card px-6 py-12 text-center sm:px-12">
-        <h2 className="text-2xl font-bold tracking-tight">Ready to check your health score?</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Ready to see where you stand?</h2>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          One period of figures takes a couple of minutes. Add a second period and the system starts
-          tracking whether you are improving.
+          One period takes about two minutes to enter. Add a second and you will start to see the
+          trend.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">

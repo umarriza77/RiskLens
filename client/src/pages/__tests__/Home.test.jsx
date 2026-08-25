@@ -37,10 +37,10 @@ describe("Home (landing page)", () => {
     [
       "Business Health Score",
       "Four-tier risk classification",
-      "Recommendations that name the problem",
+      "Recommendations you can act on",
       "Progress tracking",
       "Exportable PDF reports",
-      "Your data, only yours",
+      "Your data stays yours",
     ].forEach((title) => expect(screen.getByText(title)).toBeInTheDocument());
   });
 
@@ -48,9 +48,9 @@ describe("Home (landing page)", () => {
     renderHome();
     [
       "Enter your figures",
-      "The engine derives five ratios",
+      "Five ratios get worked out",
       "Each ratio is scored and weighted",
-      "Act, then measure again",
+      "Fix things, then check again",
     ].forEach((step) => expect(screen.getByText(step)).toBeInTheDocument());
   });
 

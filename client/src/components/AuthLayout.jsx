@@ -3,18 +3,18 @@ import { Radar, Gauge, ShieldAlert, TrendingUp } from "lucide-react";
 const HIGHLIGHTS = [
   {
     icon: Gauge,
-    title: "One score, fully explained",
-    body: "Five financial indicators become a single 0–100 Business Health Score you can trace back to your own figures.",
+    title: "One score you can explain",
+    body: "Five financial indicators, one score out of 100. Every part of it traces back to a number you entered.",
   },
   {
     icon: ShieldAlert,
-    title: "Risk you can act on",
-    body: "Every weak indicator produces a plain-language recommendation, not just a colour.",
+    title: "Advice, not just a colour",
+    body: "Anything scoring badly comes with a recommendation in plain English telling you what to do about it.",
   },
   {
     icon: TrendingUp,
-    title: "Progress, not snapshots",
-    body: "Each assessment is compared with the last, so you can see whether the business is actually improving.",
+    title: "See if it is working",
+    body: "Each assessment is measured against the last one, so you can tell whether things are actually moving.",
   },
 ];
 
@@ -76,8 +76,8 @@ export default function AuthLayout({ children }) {
               Know how healthy your business really is.
             </h2>
             <p className="mt-4 text-base leading-relaxed text-white/75">
-              A business health and risk intelligence platform for small and medium enterprises.
-              Enter your figures, get a score you can explain, and see exactly where to act.
+              Built for small and medium businesses. Enter the figures you already have and get back
+              a score, a risk level, and a clear idea of what to work on next.
             </p>
 
             <ul className="mt-10 space-y-6">
