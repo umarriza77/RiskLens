@@ -13,6 +13,8 @@ const COLORS = {
 
 const STATUS_LABEL = { neutral: "N/A" };
 
+const MARGIN = 50;
+
 const RISK_COLOR = {
   Low: COLORS.green,
   Moderate: COLORS.amber,
@@ -31,7 +33,7 @@ function fmtValue(kpi) {
  *   performanceBand, kpis[], recommendations[] }
  */
 export function streamReport(res, record) {
-  const doc = new PDFDocument({ size: "A4", margin: 50 });
+  const doc = new PDFDocument({ size: "A4", margin: MARGIN });
   doc.pipe(res);
 
   // Header
@@ -49,9 +51,19 @@ export function streamReport(res, record) {
   // Score summary
   doc.fillColor(COLORS.ink).fontSize(14).text("Business Health Score");
   doc.moveDown(0.2);
-  doc.fillColor(COLORS.ink).fontSize(40).text(`${record.bhs}`, { continued: true });
+
+  // The score and its "/ 100" suffix share a line at different font sizes. The
+  // cursor PDFKit leaves behind belongs to the *trailing* (smaller) font, which
+  // sits inside the tall number's line box, so the next line has to be placed
+  // from the measured height of the large font instead.
+  doc.fontSize(40);
+  const scoreTop = doc.y;
+  const scoreHeight = doc.currentLineHeight();
+  doc.fillColor(COLORS.ink).text(`${record.bhs}`, MARGIN, scoreTop, { continued: true });
   doc.fillColor(COLORS.muted).fontSize(16).text("  / 100");
-  doc.moveDown(0.2);
+  doc.x = MARGIN;
+  doc.y = scoreTop + scoreHeight + 6;
+
   doc.fillColor(RISK_COLOR[record.riskLevel] || COLORS.ink).fontSize(13)
     .text(`Risk Level: ${record.riskLevel}    Performance: ${record.performanceBand}`);
   doc.moveDown(0.3);
@@ -62,7 +74,7 @@ export function streamReport(res, record) {
   doc.fillColor(COLORS.ink).fontSize(14).text("KPI Breakdown");
   doc.moveDown(0.4);
 
-  const startX = 50;
+  const startX = MARGIN;
   let y = doc.y;
   doc.fontSize(10).fillColor(COLORS.muted);
   doc.text("Indicator", startX, y);
