@@ -14,6 +14,7 @@ export const COLOR_HEX = {
   green: "#16a34a",
   amber: "#d97706",
   red: "#dc2626",
+  neutral: "#64748b",
 };
 
 /**

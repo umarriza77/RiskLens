@@ -1,14 +1,35 @@
+import { z } from "zod";
 import prisma from "../lib/prisma.js";
 import { buildProgress } from "../services/progressService.js";
 
+/**
+ * Date-range filter. Validated before it reaches Prisma — an unparseable date
+ * previously produced `new Date("Invalid Date")` and a 500 whose body exposed
+ * the internal query structure.
+ */
+const rangeSchema = z
+  .object({
+    from: z.coerce.date({ invalid_type_error: "from must be a valid date" }).optional(),
+    to: z.coerce.date({ invalid_type_error: "to must be a valid date" }).optional(),
+  })
+  .refine((r) => !r.from || !r.to || r.from <= r.to, {
+    message: "from must not be later than to",
+    path: ["from"],
+  });
+
 /** Shared query: the user's BHS records in a date range, oldest first. */
 function historyQuery(req) {
-  const { from, to } = req.query;
+  const { from, to } = rangeSchema.parse({
+    // absent params stay absent; empty strings from the UI are treated as unset
+    from: req.query.from || undefined,
+    to: req.query.to || undefined,
+  });
+
   const where = { userId: req.user.id };
   if (from || to) {
     where.createdAt = {};
-    if (from) where.createdAt.gte = new Date(from);
-    if (to) where.createdAt.lte = new Date(to);
+    if (from) where.createdAt.gte = from;
+    if (to) where.createdAt.lte = to;
   }
   return { where, include: { submission: true }, orderBy: { createdAt: "asc" } };
 }

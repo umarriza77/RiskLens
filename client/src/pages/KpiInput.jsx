@@ -48,7 +48,7 @@ export default function KpiInput() {
         totalAssets: Number(form.totalAssets),
       };
       const res = await api.post("/score", payload);
-      navigate(`/?recordId=${res.data.id}`);
+      navigate(`/dashboard?recordId=${res.data.id}`);
     } catch (err) {
       setError(err.response?.data?.error || "Could not compute score");
     } finally {

@@ -44,11 +44,13 @@ model BhsRecord {
   bhs                 Float
   riskLevel           RiskLevel
   performanceBand     String
-  profitMarginScore   Float
-  currentRatioScore   Float
-  roaScore            Float
-  expenseRatioScore   Float
-  revenueGrowthScore  Float
+  // Nullable: an indicator that could not be computed and is excluded from the
+  // composite has no sub-score. Storing 0 would misrepresent it as a bad score.
+  profitMarginScore   Float?
+  currentRatioScore   Float?
+  roaScore            Float?
+  expenseRatioScore   Float?
+  revenueGrowthScore  Float?
   breakdown           Json
   createdAt           DateTime      @default(now())
 

@@ -8,6 +8,17 @@
  */
 
 // direction: "higher" => larger value is healthier; "lower" => smaller value is healthier
+//
+// nullPolicy decides what an *uncomputable* ratio means for this indicator. A
+// ratio is uncomputable when its denominator is zero, and that does not always
+// mean "unhealthy":
+//   "best"    the zero denominator is itself the healthiest state
+//             (no current liabilities => nothing short-term to cover)
+//   "exclude" the indicator is not measurable for this business, so it is
+//             dropped and the remaining weights are renormalised
+//             (no prior period => growth has no baseline)
+//   "worst"   the zero denominator genuinely signals distress
+//             (no revenue => cannot be profitable, cannot cover costs)
 export const KPI_DEFINITIONS = [
   {
     key: "profitMargin",
@@ -15,6 +26,8 @@ export const KPI_DEFINITIONS = [
     unit: "percent",
     weight: 25,
     direction: "higher",
+    nullPolicy: "worst",
+    nullNote: "No revenue recorded for this period, so the business cannot be profitable.",
     // bands evaluated top-down; first match wins. value is the derived ratio (e.g. 0.2 = 20%).
     bands: [
       { min: 0.2, score: 100 },
@@ -30,6 +43,8 @@ export const KPI_DEFINITIONS = [
     unit: "ratio",
     weight: 20,
     direction: "higher",
+    nullPolicy: "best",
+    nullNote: "No current liabilities — nothing short-term to cover, so liquidity is treated as ideal.",
     bands: [
       { min: 2.0, score: 100 },
       { min: 1.5, score: 80 },
@@ -44,6 +59,8 @@ export const KPI_DEFINITIONS = [
     unit: "percent",
     weight: 20,
     direction: "higher",
+    nullPolicy: "exclude",
+    nullNote: "No total assets recorded, so return on assets is not measurable for this period.",
     bands: [
       { min: 0.15, score: 100 },
       { min: 0.08, score: 80 },
@@ -58,6 +75,8 @@ export const KPI_DEFINITIONS = [
     unit: "percent",
     weight: 20,
     direction: "lower",
+    nullPolicy: "worst",
+    nullNote: "No revenue recorded for this period, so operating costs are not covered.",
     // for "lower is better" we use `max` thresholds; first match wins top-down.
     bands: [
       { max: 0.6, score: 100 },
@@ -73,6 +92,8 @@ export const KPI_DEFINITIONS = [
     unit: "percent",
     weight: 15,
     direction: "higher",
+    nullPolicy: "exclude",
+    nullNote: "No prior period to compare against, so growth is excluded from this score.",
     bands: [
       { min: 0.15, score: 100 },
       { min: 0.05, score: 80 },
